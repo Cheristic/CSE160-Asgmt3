@@ -156,8 +156,8 @@ function initTextures() {
   image0.onload = function(){ sendImageToTexture2D(u_Sampler0, image0, 0); };
   image1.onload = function(){ sendImageToTexture2D(u_Sampler1, image1, 1); };
   // Tell the browser to load an Image
-  image0.src = './resources/pinkflower.jpg';
-  image1.src = './resources/redflower.jpg';
+  image0.src = 'resources/pinkflower.jpg';
+  image1.src = 'resources/redflower.jpg';
 
   return true;
 }
