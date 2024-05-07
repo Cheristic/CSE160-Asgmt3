@@ -47,12 +47,13 @@ class Shape3D {
         this.children = [];
     }  
 
-    setLocalMatrix(p, r, s) {
+    setLocalMatrix(p, s, r, t) {
         this.localMatrix = new Matrix4();
     
-        this.localMatrix.translate(p[0], p[1], p[2]); // pivot
+        this.localMatrix.translate(t[0], t[1], t[2]); // translate
         this.localMatrix.rotate(r[0], r[1], r[2], r[3]); // rotate
         this.localMatrix.scale(s[0], s[1], s[2]); // scale
+        this.localMatrix.translate(p[0], p[1], p[2]); // pivot
     }
 
     prepareModelMatrix() {

@@ -15,7 +15,7 @@
     </head>
 
     <body onload="main()">
-        <canvas id="webgl" width="400" height="400">
+        <canvas id="webgl" width="640" height="480">
             Please use a browser that supports "canvas"
         </canvas>
         <script src="lib/webgl-utils.js"></script>
@@ -29,10 +29,12 @@
         <script src="Shapes/Cylinder.js"></script>
         <script src="Utility//Camera.js"></script>
         <script src="Utility//Scene.js"></script>
+        <script src="Utility/Queue.js"></script>
+        <script src="Utility//Enemy.js"></script>
         <script src="asg3.js"></script>
 
         <br>
-        Camera Angle <input type="range" min="0" max="359" value="90" class="slider" id="angleSlide">
+        R key = Reset orientation
 
         <br>
         <span id="fps">--</span> FPS

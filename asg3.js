@@ -156,7 +156,7 @@ function initTextures() {
   image0.onload = function(){ sendImageToTexture2D(u_Sampler0, image0, 0); };
   image1.onload = function(){ sendImageToTexture2D(u_Sampler1, image1, 1); };
   // Tell the browser to load an Image
-  image0.src = 'resources/pinkflower.jpg';
+  image0.src = 'resources/floor.jpg';
   image1.src = 'resources/redflower.jpg';
 
   return true;
@@ -184,6 +184,8 @@ function sendImageToTexture2D(sampler, image, texUnit) {
 
   // Set texture parameters
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
 
   // Set the image to texture
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -204,8 +206,6 @@ function addActionsForHtmlUI() {
 
   g_fps = document.getElementById("fps");
 
-  // Camera angle slider
-  document.getElementById("angleSlide").oninput = function() {g_Scene.globalRotationY = this.value;}
 }
 
 //  ## HELPER FUNCTIONS END ##
@@ -243,16 +243,16 @@ function update(timestamp) {
     frameTrackTime = t;
   }
 
-  handleRender();
+  handleRender(dt);
 
   requestAnimationFrame(update);
 }
 
-function handleRender() {
+function handleRender(dt) {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
  
-  g_Scene.renderScene();
+  g_Scene.renderScene(dt);
 }
 // ## CORE SECTION END ##
