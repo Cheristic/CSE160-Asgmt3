@@ -75,7 +75,7 @@ class Shape3D {
 
     }
 
-    render() {    
+    render(dt) {    
       this.prepareModelMatrix();
 
       gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrixBuffer.elements);

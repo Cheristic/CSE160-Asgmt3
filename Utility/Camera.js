@@ -2,7 +2,7 @@ var keysHeldState = {};
 class Camera {
     constructor() {
 
-        this.movementSpeed = 0.008;
+        this.movementSpeed = 0.016;
         this.rotationSpeed = 0.008;
         this.rotationSpeedKey = 0.01;
         this.gravity = -5;
@@ -38,30 +38,36 @@ class Camera {
             let de = new Vector3(g_Scene.cam.g_lookAtOrient.elements);
             de.sub(g_Scene.cam.g_eyePos)
 
+            let final_d = new Vector3();
+
             if (keysHeldState[87]) {
                 let d = new Vector3(de.elements);
                 d.normalize();
                 d.mul(g_Scene.cam.movementSpeed);
-                g_Scene.cam.checkForCollision(d);
-
+                final_d.add(d);
             } if (keysHeldState[83]) {
                 let d = new Vector3(de.elements);
                 d.normalize();
                 d.mul(-g_Scene.cam.movementSpeed);
-                g_Scene.cam.checkForCollision(d);
+                final_d.add(d);
             } if (keysHeldState[68]) {
                 let d = new Vector3(de.elements);
                 d.cross(g_Scene.cam.g_upVector);
                 d.normalize();
                 d.mul(-g_Scene.cam.movementSpeed);
-                g_Scene.cam.checkForCollision(d);
+                final_d.add(d);
             } if (keysHeldState[65]) {
                 let d = new Vector3(de.elements);
                 d.cross(g_Scene.cam.g_upVector);
                 d.normalize();
                 d.mul(g_Scene.cam.movementSpeed);
-                g_Scene.cam.checkForCollision(d);
+                final_d.add(d);
+                
             } 
+
+            final_d.normalize();
+            final_d.mul(g_Scene.cam.movementSpeed);
+            g_Scene.cam.checkForCollision(final_d);
 
             
 
@@ -132,6 +138,28 @@ class Camera {
     update(dt) {
         this.keyboardInput();
 
+        // check for collision with enemy
+        for (var i = 0; i < g_Scene.g_enemies.length; i++) {
+            var e = g_Scene.g_enemies[i];
+            var pos = [e.body.matrixBuffer.elements[12], e.body.matrixBuffer.elements[13], e.body.matrixBuffer.elements[14]]
+            if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .25 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .25 ) {
+            }
+        } 
+
+        // check for collision with crystal
+        for (var i = 0; i < g_Scene.g_crystals.length; i++) {
+            var c = g_Scene.g_crystals[i];
+            var pos = [c.matrixBuffer.elements[12], c.matrixBuffer.elements[13], c.matrixBuffer.elements[14]]
+            if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .07 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .07 ) {
+                let beg = [];
+                let end = [];
+                if (i > 0) beg = g_Scene.g_crystals.slice(0, i);
+                if (i < g_Scene.g_crystals.length-1) end = g_Scene.g_crystals.slice(i+1, g_Scene.g_crystals.length);
+                g_Scene.g_crystals = beg.concat(end);
+                g_Scene.crystalsCollected++;
+                c.collect();
+            }
+        } 
         
         // handle jump
         if (this.isJumping) {

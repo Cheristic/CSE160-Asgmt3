@@ -45,6 +45,7 @@ var FSHADER_SOURCE = `
 
 let canvas;
 let gl;
+let hud;
 // vertex shader variables
 let a_Position;
 let a_TexCoord;
@@ -70,7 +71,11 @@ function setupWebGL() {
     return;
   }
 
+  hud = document.getElementById('2d').getContext('2d');
+
   gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 }
 
 function connectVariablesToGLSL() {
@@ -252,6 +257,7 @@ function handleRender(dt) {
   // Clear <canvas>
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.clear(gl.COLOR_BUFFER_BIT);
+  hud.clearRect(0, 0, canvas.width, canvas.height);
  
   g_Scene.renderScene(dt);
 }

@@ -11,13 +11,28 @@
                 margin-right: 270px;
                 text-align: center;
             }
+            .wrapper {
+                position: relative;
+                width: 640px;
+                height: 480px;
+            }
+
+            .wrapper canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
         </style>
     </head>
 
     <body onload="main()">
-        <canvas id="webgl" width="640" height="480">
-            Please use a browser that supports "canvas"
-        </canvas>
+        <div class="wrapper">
+            <canvas id="webgl" width="640" height="480">
+                Please use a browser that supports "canvas"
+            </canvas>
+            <canvas id="2d" width="640" height="480">
+            </canvas>
+        </div>
         <script src="lib/webgl-utils.js"></script>
         <script src="lib/webgl-debug.js"></script>
         <script src="lib/cuon-utils.js"></script>
@@ -27,6 +42,7 @@
         <script src="Shapes/Circle.js"></script>
         <script src="Shapes/Cube.js"></script>
         <script src="Shapes/Cylinder.js"></script>
+        <script src="Shapes/Crystal.js"></script>
         <script src="Utility//Camera.js"></script>
         <script src="Utility//Scene.js"></script>
         <script src="Utility/Queue.js"></script>

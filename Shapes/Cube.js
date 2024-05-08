@@ -56,7 +56,7 @@ class Cube extends Shape3D {
       this.texNum));
   }
 
-  render() {
-    super.render();
+  render(dt) {
+    super.render(dt);
   }
 }
