@@ -1,11 +1,13 @@
 class Cylinder extends Shape3D {
-  constructor(position, color, innerRadius, outerRadius, height, segments) {
+  constructor(position, color, innerRadius, outerRadius, height, segments, half, texNum) {
     super(position, color);
     this.type='cylinder';
     this.innerRadius = innerRadius;
     this.outerRadius = outerRadius;
     this.height = height;
     this.segments = segments;
+    this.half = half;
+    this.texNum = texNum;
 
     this.generateSurfaces();
   }
@@ -47,32 +49,43 @@ class Cylinder extends Shape3D {
       let colChg = (Math.cos(angle1 * Math.PI / 180)) * .12 + 0.5;
       col = [this.color[0]*colChg, this.color[1]*colChg, this.color[2]*colChg, col[3]];
       this.surfaces.push(new Shape3DSurface(this.position, col, 
-        new Float32Array([xyz[0], xyz[1]+h, xyz[2],    
-                         pt1[0], xyz[1]+h, pt1[1],  
-                         pt2[0], xyz[1]+h, pt2[1]
+        new Float32Array([xyz[0], xyz[1]+h/2, xyz[2],    
+                         pt1[0], xyz[1]+h/2, pt1[1],  
+                         pt2[0], xyz[1]+h/2, pt2[1]
       ])));
       // top side panel
       col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
       this.surfaces.push(new Shape3DSurface(this.position, col, 
-        new Float32Array([pt1[0], xyz[1]+h, pt1[1],
-                         pt2[0], xyz[1]+h, pt2[1],
-                         pt3[0], xyz[1]+h/2, pt3[1],  
-                         pt4[0], xyz[1]+h/2, pt4[1],  
+        new Float32Array([pt1[0], xyz[1]+h/2, pt1[1],
+                         pt2[0], xyz[1]+h/2, pt2[1],
+                         pt3[0], xyz[1], pt3[1],  
+                         pt4[0], xyz[1], pt4[1],  
       ])));
-      // bottom side panel
-      col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
-      this.surfaces.push(new Shape3DSurface(this.position, col, 
-        new Float32Array([pt3[0], xyz[1]+h/2, pt3[1],  
-                         pt4[0], xyz[1]+h/2, pt4[1],
-                         pt1[0], xyz[1], pt1[1],
-                         pt2[0], xyz[1], pt2[1]  
-      ]))); // bottom
-      col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
-      this.surfaces.push(new Shape3DSurface(this.position, col, 
-        new Float32Array([xyz[0], xyz[1], xyz[2],    
-                         pt1[0], xyz[1], pt1[1],  
-                         pt2[0], xyz[1], pt2[1]
-      ])));
+
+      if (!this.half) {
+        // bottom side panel
+        col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
+        this.surfaces.push(new Shape3DSurface(this.position, col, 
+          new Float32Array([pt3[0], xyz[1], pt3[1],  
+                          pt4[0], xyz[1], pt4[1],
+                          pt1[0], xyz[1]-h/2, pt1[1],
+                          pt2[0], xyz[1]-h/2, pt2[1]  
+        ]))); // bottom
+        col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
+        this.surfaces.push(new Shape3DSurface(this.position, col, 
+          new Float32Array([xyz[0], xyz[1]-h/2, xyz[2],    
+                          pt1[0], xyz[1]-h/2, pt1[1],  
+                          pt2[0], xyz[1]-h/2, pt2[1]
+        ])));
+      } else {
+        col = [col[0]*0.9, col[1]*0.9, col[2]*0.9, col[3]];
+        this.surfaces.push(new Shape3DSurface(this.position, col, 
+          new Float32Array([xyz[0], xyz[1], xyz[2],    
+                          pt3[0], xyz[1], pt3[1],  
+                          pt4[0], xyz[1], pt4[1]
+        ])));
+      }
+      
       
     }
   }

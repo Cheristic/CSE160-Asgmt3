@@ -42,9 +42,12 @@ class Shape3D {
         this.parentMatrix = null; // final matrix -> given to children
         this.dynamicMatrix = new Matrix4(); // stores aggregation of matrix commands given at runtime
         this.frameMatrix = new Matrix4(); // the dynamic command at every frame for animation
+        this.frameMatrix2 = new Matrix4();
+        this.animMatrix = new Matrix4();
         this.matrixBuffer = new Matrix4(); // aggregates all transforms
 
         this.children = [];
+        this.keyframes = [];
     }  
 
     setLocalMatrix(p, s, r, t) {
@@ -65,6 +68,8 @@ class Shape3D {
       this.matrixBuffer = this.matrixBuffer.multiply(this.parentMatrix);
       this.matrixBuffer = this.matrixBuffer.multiply(this.localMatrix);
       this.dynamicMatrix = this.dynamicMatrix.multiply(this.frameMatrix);
+      this.dynamicMatrix = this.dynamicMatrix.multiply(this.frameMatrix2);
+      this.dynamicMatrix = this.dynamicMatrix.multiply(this.animMatrix);
       this.matrixBuffer = this.matrixBuffer.multiply(this.dynamicMatrix);
       for (let i = 0; i < this.children.length; i++) {
         this.children[i].parentMatrix = new Matrix4(this.matrixBuffer); // pass current matrix to children
@@ -86,13 +91,15 @@ class Shape3D {
 }
 
 class Shape3DSurface {
-    constructor(position, color, vertices, uv = null, textureNum = -2) {
+    constructor(position, color, vertices, uv = null, textureNum = -2, indices = null) {
       this.position = position;
       this.color = color;
+
 
       this.vertexBuffer = null;
       this.uvBuffer = null;
       this.vertices = vertices;
+      this.indices = indices;
       this.uv = uv;
       this.textureNum = textureNum;
     }
@@ -101,7 +108,6 @@ class Shape3DSurface {
       var rgba = this.color;  
       // Pass the color of a point to u_FragColor variable
       gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-      
       gl.uniform1i(u_textureSelector, this.textureNum);
   
       // set up vertex buffer

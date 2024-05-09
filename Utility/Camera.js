@@ -2,9 +2,9 @@ var keysHeldState = {};
 class Camera {
     constructor() {
 
-        this.movementSpeed = 0.016;
+        this.movementSpeed = 0.02;
         this.rotationSpeed = 0.008;
-        this.rotationSpeedKey = 0.01;
+        this.rotationSpeedKey = 0.06;
         this.gravity = -5;
         this.jumpForce = 1.5;
         this.isJumping = false;
@@ -25,6 +25,10 @@ class Camera {
 
         document.addEventListener("mousemove", this.mouseInput, true);
         this.mousePosDelta = [0, 0];
+
+        this.restartEvent = new Event("death");
+        document.addEventListener("death", () => this.restart());
+        this.isRestarting = false;
     }
 
     checkForCollision(d) {
@@ -141,16 +145,25 @@ class Camera {
         // check for collision with enemy
         for (var i = 0; i < g_Scene.g_enemies.length; i++) {
             var e = g_Scene.g_enemies[i];
-            var pos = [e.body.matrixBuffer.elements[12], e.body.matrixBuffer.elements[13], e.body.matrixBuffer.elements[14]]
+            var pos = [e.base.matrixBuffer.elements[12], e.base.matrixBuffer.elements[13], e.base.matrixBuffer.elements[14]]
             if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .25 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .25 ) {
+                if (!this.isRestarting) {
+                    document.dispatchEvent(this.restartEvent);
+                    g_Scene.placedReady = false;
+                    this.isRestarting = true;
+                }
+
             }
         } 
+
+        g_Scene.placedReady = true;
+        this.isRestarting = false;
 
         // check for collision with crystal
         for (var i = 0; i < g_Scene.g_crystals.length; i++) {
             var c = g_Scene.g_crystals[i];
             var pos = [c.matrixBuffer.elements[12], c.matrixBuffer.elements[13], c.matrixBuffer.elements[14]]
-            if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .07 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .07 ) {
+            if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .1 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .1 ) {
                 let beg = [];
                 let end = [];
                 if (i > 0) beg = g_Scene.g_crystals.slice(0, i);
@@ -184,5 +197,13 @@ class Camera {
 
         this.g_projectionMatrix.setPerspective(80, canvas.width/canvas.height, .01, 500);
         gl.uniformMatrix4fv(u_ProjectionMatrix, false, this.g_projectionMatrix.elements);
+    }
+
+    restart() {
+        this.g_eyePos.set([0, this.groundedY, -1]);
+        this.g_lookAt.set([0, this.groundedY, 0]);
+        this.g_lookAtOrient.set(this.g_lookAt.elements);
+        this.isJumping = false;
+        this.velocityY = 0;
     }
 }

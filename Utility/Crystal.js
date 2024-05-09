@@ -1,5 +1,5 @@
 class Crystal extends Shape3D {
-    constructor(position, color, width, length, height, texNum) {
+    constructor(position, color, width, length, height, texNum, scene) {
       super(position, color);
       this.type='crystal';
       this.width = width/200;
@@ -16,6 +16,12 @@ class Crystal extends Shape3D {
       this.collectedAnimTime = 0;
   
       this.generateSurfaces();
+
+      this.waypoint = new Cube([0, 0, 0], this.color, 40,40,400, -2)
+      this.waypoint.setLocalMatrix([0, 2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [position[0], position[1], position[2]]);
+      scene.g_shapesList.push(this.waypoint);
+      this.children.push(this.waypoint);
+
     }
   
     generateSurfaces() {
@@ -90,6 +96,9 @@ class Crystal extends Shape3D {
         for (let i = 0; i < this.surfaces.length; i++) {
           this.surfaces[i].color[3] -= .02;
         }
+        for (let i = 0; i < this.waypoint.surfaces.length; i++) {
+          this.waypoint.surfaces[i].color[3] -= .02;
+        }
         this.dynamicMatrix.translate(0, this.collectedAnimTime/8, 0)
         this.collectedAnimTime += dt;
       }
@@ -101,4 +110,5 @@ class Crystal extends Shape3D {
     collect() {
       this.collected = true;
     }
+
   }

@@ -32,6 +32,7 @@ class Scene {
         // keep track of progress
         this.crystalsCollected = 0;
         hud.font = "bold 40px serif";
+        hud.textAlign = "center";
         hud.textBaseLine = "middle";
         hud.strokeStyle = "#EFEFEF";
 
@@ -56,42 +57,52 @@ class Scene {
         c.setLocalMatrix([3, 0, 3], [.8, 1.0, .8], [0, 0, 0, 1], [0, 0, 0]);
         this.g_shapesList.push(c);
 
-        let enemy1 = new Enemy(this, 60, 51);
+        let enemy1 = new Enemy(this, 50, 47, "pawn");
         this.g_enemies.push(enemy1);
 
-        let enemy2 = new Enemy(this, 34, 57);
+        /*let enemy1 = new Enemy(this, 60, 51, "pawn");
+        this.g_enemies.push(enemy1);
+
+        let enemy2 = new Enemy(this, 34, 57, "pawn");
         this.g_enemies.push(enemy2);
 
-        let enemy3 = new Enemy(this, 43, 36);
+        let enemy3 = new Enemy(this, 40, 33, "pawn");
         this.g_enemies.push(enemy3);
 
-        let enemy4 = new Enemy(this, 64, 71);
+        let enemy4 = new Enemy(this, 64, 71, "pawn");
         this.g_enemies.push(enemy4);
 
-        let enemy5 = new Enemy(this, 34, 75);
+        let enemy5 = new Enemy(this, 34, 75, "pawn");
         this.g_enemies.push(enemy5);
 
-        let enemy6 = new Enemy(this, 74, 36);
+        let enemy6 = new Enemy(this, 74, 36, "pawn");
         this.g_enemies.push(enemy6);
 
-        let enemy7 = new Enemy(this, 72, 72);
+        let enemy7 = new Enemy(this, 72, 72, "pawn");
         this.g_enemies.push(enemy7);
 
-        let enemy8 = new Enemy(this, 42, 54);
-        this.g_enemies.push(enemy8);
+        let enemy8 = new Enemy(this, 42, 54, "pawn");
+        this.g_enemies.push(enemy8);*/
         
-        let crystal1 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2)
+        let crystal1 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
         crystal1.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [.5, .35, 0]);
         this.g_crystals.push(crystal1);
         this.g_crystalsRender.push(crystal1);
 
-        let crystal2 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2)
-        crystal2.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [.5, .35, .4]);
+        let crystal2 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal2.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [2.5, .35, .4]);
         this.g_crystals.push(crystal2);
         this.g_crystalsRender.push(crystal2);
 
+        document.addEventListener("death", () => {
+            for (let i = 0; i < g_Scene.g_enemies.length; i++) {
+                g_Scene.g_enemies[i].restart();
+            }
+        });
+
         // https://stackoverflow.com/questions/48969495/in-javascript-how-do-i-should-i-use-async-await-with-xmlhttprequest
         this.placeMapLayout(await this.retriveMapLayout());
+        
     }
 
     retriveMapLayout() {
@@ -177,19 +188,26 @@ class Scene {
         let neighboring_spaces = []
 
         //add_if_valid_cell(x-1, z-1, this.layoutInfo, this);
-        add_if_valid_cell(x, z-1, this.layoutInfo, this);
+        add_if_valid_cell(x, z-1, this.layoutInfo, this, this.g_enemies);
         //add_if_valid_cell(x+1, z-1, this.layoutInfo, this);
-        add_if_valid_cell(x-1, z, this.layoutInfo, this);
-        add_if_valid_cell(x+1, z, this.layoutInfo, this);
+        add_if_valid_cell(x-1, z, this.layoutInfo, this, this.g_enemies);
+        add_if_valid_cell(x+1, z, this.layoutInfo, this, this.g_enemies);
         //add_if_valid_cell(x-1, z+1, this.layoutInfo, this);
-        add_if_valid_cell(x, z+1, this.layoutInfo, this);
+        add_if_valid_cell(x, z+1, this.layoutInfo, this, this.g_enemies);
         //add_if_valid_cell(x+1, z+1, this.layoutInfo, this);
 
         
-        function add_if_valid_cell(_x, _z, layout, scene) {
+        function add_if_valid_cell(_x, _z, layout, scene, enemies) {
             if (!scene.placedReady) return;
             if (_x >= 0 && _x < layout.cols && _z >= 0 && _z < layout.rows) {
-                if (scene.g_mapLayout[_z][_x].length <= 0) {neighboring_spaces.push([_z, _x]);}
+                if (scene.g_mapLayout[_z][_x].length <= 0) {
+                    for (let i = 0; i < enemies.length; i++) {
+                        if (enemies[i].moveToPosition[0] == _z && enemies[i].moveToPosition[1] == _x) {
+                            return;
+                        }
+                    }
+                    neighboring_spaces.push([_z, _x]);
+                }
             }
         }
 
@@ -244,11 +262,21 @@ class Scene {
 
         this.cam.update(dt);
      
-        hud.strokeText("x " + this.crystalsCollected.toString(), 100, 65);
-        hud.fillText("x " + this.crystalsCollected.toString(), 100, 65);
+        hud.font = "bold 40px serif";
+        hud.strokeText("x " + this.crystalsCollected.toString(), 130, 65);
+        hud.fillText("x " + this.crystalsCollected.toString(), 130, 65);
 
         if (this.drawCrystalIcon) {
             hud.drawImage(this.crystalsIcon, 0, 5);
+            if (this.crystalsCollected >= 8) {
+                hud.strokeText(`You Beat`, 320, canvas.height/2);
+                hud.fillText("You Beat", 320, canvas.height/2);
+                hud.strokeText(`Chess 2!`, 320, canvas.height/2 + 50);
+                hud.fillText("Chess 2!", 320, canvas.height/2 + 50);
+                hud.font = "bold 15px serif";
+                hud.strokeText(`you can accomplish anything you put your mind to!`, 320, canvas.height/2 + 80);
+                hud.fillText("you can accomplish anything you put your mind to!", 320, canvas.height/2 + 80);
+            }
         }
     }
 }
