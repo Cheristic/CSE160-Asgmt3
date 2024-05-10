@@ -12,7 +12,7 @@ class Camera {
         this.groundedY = .3;
 
         // Camera Globals
-        this.g_eyePos = new Vector3([0, this.groundedY, -1]);
+        this.g_eyePos = new Vector3([0, this.groundedY, -1.1]);
         this.g_lookAt = new Vector3([0, this.groundedY, 0]);
         this.g_lookAtOrient = new Vector3(this.g_lookAt.elements);
         this.g_upVector = new Vector3([0, 1, 0]);
