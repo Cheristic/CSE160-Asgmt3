@@ -1,6 +1,5 @@
 class Scene {
     constructor() {
-        this.cam = new Camera();
 
         this.g_globalRotationMatrix = new Matrix4();
         this.globalRotationY = 90;
@@ -9,8 +8,12 @@ class Scene {
         this.g_shapesList = [];
         this.g_hudElements = [];
 
+        this.cam = new Camera(this);
+
+
         // Map variables
         this.g_mapLayout = [];
+        this.g_crates = [];
         this.g_mapFilledCoordinates = [];
         this.layoutInfo = {
             rows: 100,
@@ -21,6 +24,9 @@ class Scene {
         this.g_enemies = [];
         this.g_crystals = [];
         this.g_crystalsRender = [];
+
+        document.addEventListener('click', () => {g_Scene.onHitCrowbar();})
+        this.crowbarAnimTime = 2;
 
         this.buildHUD();
        
@@ -46,6 +52,14 @@ class Scene {
         this.crystalsIcon.onload = function() {
             g_Scene.drawCrystalIcon = true;
         }
+
+        this.crowbar = new Image();
+        this.crowbar.src = 'resources/crowbar.png';
+        this.drawCrowbar = false;
+        this.crowbar.onload = () => {
+            g_Scene.drawCrowbar = true;
+        }
+
     }
 
     async buildScene() {
@@ -60,7 +74,7 @@ class Scene {
         //let enemy1 = new Enemy(this, 50, 47, "pawn");
         //this.g_enemies.push(enemy1);
 
-        /*let enemy1 = new Enemy(this, 60, 51, "pawn");
+        let enemy1 = new Enemy(this, 60, 51, "pawn");
         this.g_enemies.push(enemy1);
 
         let enemy2 = new Enemy(this, 34, 57, "pawn");
@@ -82,7 +96,10 @@ class Scene {
         this.g_enemies.push(enemy7);
 
         let enemy8 = new Enemy(this, 42, 54, "pawn");
-        this.g_enemies.push(enemy8);*/
+        this.g_enemies.push(enemy8);
+
+        let enemy9 = new Enemy(this, 60, 78, "pawn");
+        this.g_enemies.push(enemy9);
         
         let crystal1 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
         crystal1.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [.5, .35, 0]);
@@ -90,9 +107,39 @@ class Scene {
         this.g_crystalsRender.push(crystal1);
 
         let crystal2 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
-        crystal2.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [2.5, .35, .4]);
+        crystal2.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [10, .35, -5.5]);
         this.g_crystals.push(crystal2);
         this.g_crystalsRender.push(crystal2);
+
+        let crystal3 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal3.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [-7, .35, 2.5]);
+        this.g_crystals.push(crystal3);
+        this.g_crystalsRender.push(crystal3);
+
+        let crystal4 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal4.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [-3, .35, -5]);
+        this.g_crystals.push(crystal4);
+        this.g_crystalsRender.push(crystal4);
+
+        let crystal5 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal5.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [4.5, .35, 7.5]);
+        this.g_crystals.push(crystal5);
+        this.g_crystalsRender.push(crystal5);
+
+        let crystal6 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal6.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [7.5, .35, 2]);
+        this.g_crystals.push(crystal6);
+        this.g_crystalsRender.push(crystal6);
+
+        let crystal7 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal7.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [11, .35, 8]);
+        this.g_crystals.push(crystal7);
+        this.g_crystalsRender.push(crystal7);
+
+        let crystal8 = new Crystal([0, 0, 0], [0.85, 0.45, 0.75, 1.0], 50, 50, 50, -2, this)
+        crystal8.setLocalMatrix([0, -.125, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [-5.6, .35, 8.4]);
+        this.g_crystals.push(crystal8);
+        this.g_crystalsRender.push(crystal8);
 
         document.addEventListener("death", () => {
             for (let i = 0; i < g_Scene.g_enemies.length; i++) {
@@ -135,8 +182,11 @@ class Scene {
         for (var c = 0; c < this.layoutInfo.cols; c++) {
             let col = [];
             this.g_mapLayout.push(col);
+            let col2 = [];
+            this.g_crates.push(col2);
             for (var r = 0; r < this.layoutInfo.rows; r++) {
                 col.push([]);
+                col2.push([]);
             }
         }
 
@@ -147,9 +197,10 @@ class Scene {
             let x = parseFloat(pos[0]); let y = parseFloat(pos[1]); let z = parseFloat(pos[2]);
             if (x == 9) continue;
 
-            if (i % 6 == 0 || i % 13 == 0 && y == 0) {
+            let rotwall = Math.random()*4-2;
+            if ((i % 6 == 0 || i % 13 == 0) && y == 0) {
                 let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-                wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
+                wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [rotwall, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
                 this.g_shapesList.push(wall2);
             } else if (z <= 31 && z < 80 && x >= 31 && x < 43 && y == 0){
                 if (z % 2 || x % 2) {
@@ -159,26 +210,35 @@ class Scene {
                 }         
             }
         
-            let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            let scale = 1.0;
-            if (y <= 1) scale == .99;
-            box.setLocalMatrix([0, .2, 0], [scale, scale, scale], [0, 0, 0, 1], [(x-49)/2.5, y/2.5+.001, (z-49)/2.5]);
-            this.g_shapesList.push(box);
-            if (y <= 0) {
+            if (y >= 0) { // hedge on ground level
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
+                let scale = 1.0;
+                let rot = Math.random()*4-2;
+                if (y >= 1) scale == .99;
+                box.setLocalMatrix([0, .2, 0], [scale, scale, scale], [rot, 0, 1, 0], [(x-49)/2.5, y/2.5+.001, (z-49)/2.5]);
+                this.g_shapesList.push(box);
+                if (y <= 0) {
+                    this.g_mapLayout[x][z].push(box);
+                    this.g_mapFilledCoordinates.push(box);
+                }
+            } else if (y == -1) { // place breakable
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 2)
+                box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 1, 0], [(x-49)/2.5, 0/2.5+.001, (z-49)/2.5]);
+                this.g_shapesList.push(box);
+                this.g_crates[x][z].push(box);
                 this.g_mapLayout[x][z].push(box);
                 this.g_mapFilledCoordinates.push(box);
-            }     
+            }
         }
 
         // build ceiling area
-        for (let z = 31; z < 80; z++) {
+        /*for (let z = 31; z < 80; z++) {
             for (let x = 31; x < 43; x++) {
                 let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
                 box.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 2/2.5+.001, (z-49)/2.5]);
                 this.g_shapesList.push(box);
             }
-        }
-
+        }*/
         
 
         for (var t = 0; t < 50; t++) {
@@ -307,6 +367,18 @@ class Scene {
         hud.font = "bold 40px serif";
         hud.strokeText("x " + this.crystalsCollected.toString(), 130, 65);
         hud.fillText("x " + this.crystalsCollected.toString(), 130, 65);
+        
+        if (this.drawCrowbar) {
+            if (this.crowbarAnimTime >= Math.PI/2) {this.crowbarAnimTime = Math.PI/2;}
+            else {this.crowbarAnimTime += dt*4;}
+            let rot = Math.sin(this.crowbarAnimTime * 2) * -20;
+
+            hud.save();
+            hud.translate(canvas.width - 150, canvas.height - 100);
+            hud.rotate(rot* Math.PI/180);
+            hud.drawImage(this.crowbar, -50, -120)
+            hud.restore();
+        }
 
         if (this.drawCrystalIcon) {
             hud.drawImage(this.crystalsIcon, 0, 5);
@@ -319,6 +391,33 @@ class Scene {
                 hud.strokeText(`you can accomplish anything you put your mind to!`, 320, canvas.height/2 + 80);
                 hud.fillText("you can accomplish anything you put your mind to!", 320, canvas.height/2 + 80);
             }
+        }
+
+        
+        
+    }
+
+    onHitCrowbar() {
+        this.crowbarAnimTime = 0;
+
+        let eye = g_Scene.cam.g_eyePos;
+        let look = g_Scene.cam.g_lookAt;
+        let coord = new Vector3(look.elements);
+        coord.sub(eye);
+        coord.normalize();
+        coord.elements[0] = Math.round(coord.elements[0]);
+        coord.elements[1] = 0;
+        coord.elements[2] = -Math.round(coord.elements[2]);
+        let pos = [this.layoutInfo.rows-(Math.round(eye.elements[2]*2.5)+51)+coord.elements[2], (Math.round(eye.elements[0]*2.5)+49)+coord.elements[0]]
+
+        if (this.g_crates[pos[0]][pos[1]].length > 0) {
+            let crate = this.g_crates[pos[0]][pos[1]][0];
+            this.g_crates[pos[0]][pos[1]] = [];
+            this.g_mapLayout[pos[0]][pos[1]] = [];
+            let index = this.g_mapFilledCoordinates.indexOf(crate);
+            this.g_mapFilledCoordinates.splice(index, 1);
+            index = this.g_shapesList.indexOf(crate);
+            this.g_shapesList.splice(index, 1);
         }
     }
 }

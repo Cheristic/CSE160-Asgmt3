@@ -24,6 +24,7 @@ var FSHADER_SOURCE = `
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
   uniform sampler2D u_Sampler1;
+  uniform sampler2D u_Sampler2;
   uniform int u_textureSelector;
   varying vec2 v_TexCoord;
   varying vec4 v_Color;
@@ -44,6 +45,9 @@ var FSHADER_SOURCE = `
     else if (u_textureSelector == 1) {
       gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
     } 
+    else if (u_textureSelector == 2) {
+      gl_FragColor = texture2D(u_Sampler2, v_TexCoord);
+    }
     else {
       gl_FragColor = vec4(1, .2, .2, 1);
     }
@@ -65,6 +69,7 @@ let a_Color;
 let u_FragColor;
 let u_Sampler0;
 let u_Sampler1;
+let u_Sampler2;
 let u_textureSelector;
 
 // ## WEBGL SETUP START ##
@@ -154,6 +159,11 @@ function connectVariablesToGLSL() {
     console.log('Failed to get the storage location of u_Sampler1');
     return;
   }
+  u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+  if (!u_Sampler2) {
+    console.log('Failed to get the storage location of u_Sampler2');
+    return;
+  }
 
   u_textureSelector = gl.getUniformLocation(gl.program, 'u_textureSelector');
   if (!u_textureSelector) {
@@ -167,16 +177,19 @@ function initTextures() {
   // Create the image object
   var image0 = new Image();
   var image1 = new Image();
-  if (!image0 || !image1) {
+  var image2 = new Image();
+  if (!image0 || !image1 || !image2) {
     console.log('Failed to create the image object');
     return false;
   }
   // Register the event handler to be called when image loading is completed
   image0.onload = function(){ sendImageToTexture2D(u_Sampler0, image0, 0); };
   image1.onload = function(){ sendImageToTexture2D(u_Sampler1, image1, 1); };
+  image2.onload = function(){ sendImageToTexture2D(u_Sampler2, image2, 2); };
   // Tell the browser to load an Image
   image0.src = 'resources/floor.jpg';
-  image1.src = 'resources/hedge.jpg';
+  image1.src = 'resources/hedgewall.jpg';
+  image2.src = 'resources/crate.jpg';
 
   return true;
 }
@@ -197,6 +210,9 @@ function sendImageToTexture2D(sampler, image, texUnit) {
   } else if (texUnit == 1) {
     gl.activeTexture(gl.TEXTURE1);
     g_texUnit1 = true;
+  } else if (texUnit == 2) {
+    gl.activeTexture(gl.TEXTURE2);
+    g_texUnit2 = true;
   }
   // Bind the texture object to the target
   gl.bindTexture(gl.TEXTURE_2D, texture);   

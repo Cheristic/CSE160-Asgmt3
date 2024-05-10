@@ -1,6 +1,6 @@
 var keysHeldState = {};
 class Camera {
-    constructor() {
+    constructor(scene) {
 
         this.movementSpeed = 0.02;
         this.rotationSpeed = 0.008;
@@ -104,6 +104,9 @@ class Camera {
             g_Scene.cam.g_lookAt = new Vector3(g_Scene.cam.g_lookAtOrient.elements);
         }
 
+        if (keysHeldState[16]) this.movementSpeed = .032;
+        else this.movementSpeed = .017;
+
         if (keysHeldState[32]) { // Jump = Space 
             if (!g_Scene.cam.isJumping) {
                 g_Scene.cam.isJumping = true;
@@ -197,6 +200,7 @@ class Camera {
 
         this.g_projectionMatrix.setPerspective(80, canvas.width/canvas.height, .01, 500);
         gl.uniformMatrix4fv(u_ProjectionMatrix, false, this.g_projectionMatrix.elements);
+
     }
 
     restart() {

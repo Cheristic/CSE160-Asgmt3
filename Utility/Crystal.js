@@ -101,6 +101,14 @@ class Crystal extends Shape3D {
         }
         this.dynamicMatrix.translate(0, this.collectedAnimTime/8, 0)
         this.collectedAnimTime += dt;
+      } else if (this.collected) {
+        for (let i = 0; i < this.surfaces.length; i++) {
+          this.surfaces[i].color[3] = 0;
+        }
+        for (let i = 0; i < this.waypoint.surfaces.length; i++) {
+          this.waypoint.surfaces[i].color[3] = 0;
+        }
+        this.collectedAnimTime = 5;
       }
 
       this.time += dt;

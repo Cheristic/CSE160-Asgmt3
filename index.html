@@ -2,15 +2,31 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <title>Hello Blocky World</title>
+        <title>Chess 2</title>
         <style>
-            body {text-align:left;}
-            h3 {
+            body {
+                text-align:left;
+                background-color:#edede4;
+            }
+            h2 {
                 margin: 0;
                 padding: 0;
-                margin-right: 270px;
-                text-align: center;
+                padding-left:190px;
             }
+            .intro {
+                margin: 0;
+                padding-left:120px;
+                display: flex;
+                flex-wrap: wrap;
+                text-align: center;
+                width: 350px;
+            }
+            .title {
+                font-size: 30px;
+                margin: 0;
+                padding: 0;
+            }
+
             .wrapper {
                 position: relative;
                 width: 640px;
@@ -52,10 +68,26 @@
         <script src="asg3.js"></script>
 
         <br>
-        R key = Reset orientation
-
+        <h2>
+            Welcome to Chess 2
+        </h2>
+        <div class="intro">
+            Collect all 8 crystals and avoid being captured by the pawns approaching you right now as you read this!
+        </div>
         <br>
+        <div class="title">
+            CONTROLS
+        </div>
+
+            <b>WASD</b> - Move
+        <br><b>R</b> - Reset orientation
+        <br><b>Space</b> - Jump
+        <br><b>Left Mouse Button</b> - Break crate
+
+        <br><br>
         <span id="fps">--</span> FPS
+
+        
         
         
     </body>
