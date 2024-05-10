@@ -204,7 +204,8 @@ class Camera {
     }
 
     restart() {
-        this.g_eyePos.set([0, this.groundedY, -1]);
+        this.g_eyePos.set([0, this.groundedY, -1.1]);
+        
         this.g_lookAt.set([0, this.groundedY, 0]);
         this.g_lookAtOrient.set(this.g_lookAt.elements);
         this.isJumping = false;

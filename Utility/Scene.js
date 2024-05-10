@@ -232,13 +232,13 @@ class Scene {
         }
 
         // build ceiling area
-        /*for (let z = 31; z < 80; z++) {
+        for (let z = 31; z < 80; z++) {
             for (let x = 31; x < 43; x++) {
                 let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
                 box.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 2/2.5+.001, (z-49)/2.5]);
                 this.g_shapesList.push(box);
             }
-        }*/
+        }
         
 
         for (var t = 0; t < 50; t++) {
