@@ -176,7 +176,7 @@ function initTextures() {
   image1.onload = function(){ sendImageToTexture2D(u_Sampler1, image1, 1); };
   // Tell the browser to load an Image
   image0.src = 'resources/floor.jpg';
-  image1.src = 'resources/redflower.jpg';
+  image1.src = 'resources/hedge.jpg';
 
   return true;
 }

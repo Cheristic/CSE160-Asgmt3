@@ -57,8 +57,8 @@ class Scene {
         c.setLocalMatrix([3, 0, 3], [.8, 1.0, .8], [0, 0, 0, 1], [0, 0, 0]);
         this.g_shapesList.push(c);
 
-        let enemy1 = new Enemy(this, 50, 47, "pawn");
-        this.g_enemies.push(enemy1);
+        //let enemy1 = new Enemy(this, 50, 47, "pawn");
+        //this.g_enemies.push(enemy1);
 
         /*let enemy1 = new Enemy(this, 60, 51, "pawn");
         this.g_enemies.push(enemy1);
@@ -145,25 +145,60 @@ class Scene {
             if (positions[i] == '') continue;
             let pos = positions[i].split(' ');
             let x = parseFloat(pos[0]); let y = parseFloat(pos[1]); let z = parseFloat(pos[2]);
+            if (x == 9) continue;
+
+            if (i % 6 == 0 || i % 13 == 0 && y == 0) {
+                let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+                wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
+                this.g_shapesList.push(wall2);
+            } else if (z <= 31 && z < 80 && x >= 31 && x < 43 && y == 0){
+                if (z % 2 || x % 2) {
+                    let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+                    wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
+                    this.g_shapesList.push(wall2);
+                }         
+            }
+        
             let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(x-49)/2.5, y/2.5+.001, (z-49)/2.5]);
+            let scale = 1.0;
+            if (y <= 1) scale == .99;
+            box.setLocalMatrix([0, .2, 0], [scale, scale, scale], [0, 0, 0, 1], [(x-49)/2.5, y/2.5+.001, (z-49)/2.5]);
             this.g_shapesList.push(box);
             if (y <= 0) {
                 this.g_mapLayout[x][z].push(box);
                 this.g_mapFilledCoordinates.push(box);
-            }    
+            }     
         }
+
+        // build ceiling area
+        for (let z = 31; z < 80; z++) {
+            for (let x = 31; x < 43; x++) {
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
+                box.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 2/2.5+.001, (z-49)/2.5]);
+                this.g_shapesList.push(box);
+            }
+        }
+
+        
 
         for (var t = 0; t < 50; t++) {
             let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
             box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 0, (100-49-20)/2.5]);
             this.g_shapesList.push(box);
+
+            let wall = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+            wall.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 1/2.5+.001, (100-20-49)/2.5]);
+            this.g_shapesList.push(wall);
             this.g_mapLayout[t+30][80].push(box);
             this.g_mapFilledCoordinates.push(box);
 
             let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
             box2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 0, (-49+30)/2.5]);
             this.g_shapesList.push(box2);
+
+            let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+            wall2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 1/2.5+.001, (-49+30)/2.5]);
+            this.g_shapesList.push(wall2);
             this.g_mapLayout[t+30][30].push(box);
             this.g_mapFilledCoordinates.push(box2);
         }
@@ -172,12 +207,19 @@ class Scene {
             let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
             box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(100-49-20)/2.5, 0, (t-49+30)/2.5]);
             this.g_shapesList.push(box);
+
+            let wall = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+            wall.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(100-49-20)/2.5, 1/2.5+.001, (t-49+30)/2.5]);
+            this.g_shapesList.push(wall);
             this.g_mapLayout[80][t+30].push(box);
             this.g_mapFilledCoordinates.push(box);
 
             let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
             box2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(-49+30)/2.5, 0, (t-49+30)/2.5]);
             this.g_shapesList.push(box2);
+            let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
+            wall2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(-49+30)/2.5, 1/2.5+.001, (t-49+30)/2.5]);
+            this.g_shapesList.push(wall2);
             this.g_mapLayout[30][t+30].push(box);
             this.g_mapFilledCoordinates.push(box2);
         }
