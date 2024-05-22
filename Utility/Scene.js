@@ -7,9 +7,9 @@ class Scene {
         // Rendering Globals
         this.g_shapesList = [];
         this.g_hudElements = [];
+        this.lights = [];
 
         this.cam = new Camera(this);
-
 
         // Map variables
         this.g_mapLayout = [];
@@ -63,16 +63,20 @@ class Scene {
     }
 
     async buildScene() {
-        let sky = new Cube([0, -50, 0], [.09, .07, .12, 1.0], 50000, 50000, 50000, -2)
+        let sky = new Sphere([0, 0, 0], [.09, .07, .12, 1.0], .1, 12, -2, false, 1)
+        sky.setLocalMatrix([0,0, 0], [-50, -50, 50], [270, 0, 1, 0], [0, 0, 0]);
         this.g_shapesList.push(sky);
 
-        // Base cube
-        let c = new Cube([0, 0, 0], [0.9, 0.45, 0.25, 1.0], 5000, 5000, 1, 0, 80)
-        c.setLocalMatrix([3, 0, 3], [.8, 1.0, .8], [0, 0, 0, 1], [0, 0, 0]);
-        this.g_shapesList.push(c);
+        g_PointLight.obj = new Cube([0, 0, 0], [2, 2, 1, 1.0], -2, 1);
+        g_PointLight.obj.setLocalMatrix([0, 0, 0], [2, .2, 2], [0, 0, 0, 1], [6, 6, .5]);
+        g_PointLight.position = [6, 6, .5];
+        this.lights.push(g_PointLight);
+        gl.uniform3f(u_SpotLightPosition, .1, 5, 0);
 
-        //let enemy1 = new Enemy(this, 50, 47, "pawn");
-        //this.g_enemies.push(enemy1);
+        // Base cube
+        this.ground = new Cube([0, 0, 0], [0.9, 0.45, 0.25, 1.0], 0, 8);
+        this.ground.setLocalMatrix([0, 0, 0], [22, -.1, 22], [0, 0, 0, 1], [3, -.05, 3]);
+        this.g_shapesList.push(this.ground);
 
         let enemy1 = new Enemy(this, 60, 51, "pawn");
         this.g_enemies.push(enemy1);
@@ -145,6 +149,7 @@ class Scene {
             for (let i = 0; i < g_Scene.g_enemies.length; i++) {
                 g_Scene.g_enemies[i].restart();
             }
+            g_Scene.placedReady = true;
         });
 
         // https://stackoverflow.com/questions/48969495/in-javascript-how-do-i-should-i-use-async-await-with-xmlhttprequest
@@ -197,33 +202,29 @@ class Scene {
             let x = parseFloat(pos[0]); let y = parseFloat(pos[1]); let z = parseFloat(pos[2]);
             if (x == 9) continue;
 
-            let rotwall = Math.random()*4-2;
-            if ((i % 6 == 0 || i % 13 == 0) && y == 0) {
-                let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-                wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [rotwall, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
-                this.g_shapesList.push(wall2);
-            } else if (z <= 31 && z < 80 && x >= 31 && x < 43 && y == 0){
-                if (z % 2 || x % 2) {
-                    let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-                    wall2.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 1/2.5+.001, (z-49)/2.5]);
-                    this.g_shapesList.push(wall2);
-                }         
-            }
         
             if (y >= 0) { // hedge on ground level
-                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-                let scale = 1.0;
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+                let scale = .39;
+                let scaleY = .39;
+                let pivotY = 0;
                 let rot = Math.random()*4-2;
-                if (y >= 1) scale == .99;
-                box.setLocalMatrix([0, .2, 0], [scale, scale, scale], [rot, 0, 1, 0], [(x-49)/2.5, y/2.5+.001, (z-49)/2.5]);
+                if (y >= 1) scaleY == .39;
+                else if ((i % 6 == 0 || i % 13 == 0) || (z <= 31 && z < 80 && x >= 31 && x < 43)) {
+                    // scale
+                    scaleY *= 2;
+                    pivotY = .2;
+                }
+                box.setLocalMatrix([0, 0, 0], [scale, scaleY, -scale], [rot, 0, 1, 0], [(x-49)/2.5, y/2.5+.201+pivotY, (z-49)/2.5]);  
+
                 this.g_shapesList.push(box);
                 if (y <= 0) {
                     this.g_mapLayout[x][z].push(box);
                     this.g_mapFilledCoordinates.push(box);
                 }
             } else if (y == -1) { // place breakable
-                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 2)
-                box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 1, 0], [(x-49)/2.5, 0/2.5+.001, (z-49)/2.5]);
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 2)
+                box.setLocalMatrix([0, 0, 0], [.39,.39,-.39], [0, 0, 1, 0], [(x-49)/2.5, 0/2.5+.201, (z-49)/2.5]);
                 this.g_shapesList.push(box);
                 this.g_crates[x][z].push(box);
                 this.g_mapLayout[x][z].push(box);
@@ -234,53 +235,38 @@ class Scene {
         // build ceiling area
         for (let z = 31; z < 80; z++) {
             for (let x = 31; x < 43; x++) {
-                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-                box.setLocalMatrix([0, .2, 0], [.99, .99, .99], [0, 0, 0, 1], [(x-49)/2.5, 2/2.5+.001, (z-49)/2.5]);
+                let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+                box.setLocalMatrix([0, .2, 0], [.4, .4, .4], [0, 0, 0, 1], [(x-49)/2.5, 2/2.5+.201, (z-49)/2.5]);
                 this.g_shapesList.push(box);
             }
         }
         
 
         for (var t = 0; t < 50; t++) {
-            let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 0, (100-49-20)/2.5]);
+            let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+            box.setLocalMatrix([0, 0, 0], [.39, .68, .39], [0, 0, 0, 1], [(t-49+30)/2.5, .401, (100-49-20)/2.5]);
             this.g_shapesList.push(box);
-
-            let wall = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-            wall.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 1/2.5+.001, (100-20-49)/2.5]);
-            this.g_shapesList.push(wall);
             this.g_mapLayout[t+30][80].push(box);
             this.g_mapFilledCoordinates.push(box);
 
-            let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            box2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 0, (-49+30)/2.5]);
+            let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+            box2.setLocalMatrix([0, 0, 0], [.39, .68, .39], [0, 0, 0, 1], [(t-49+30)/2.5, .401, (-49+30)/2.5]);
             this.g_shapesList.push(box2);
-
-            let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-            wall2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(t-49+30)/2.5, 1/2.5+.001, (-49+30)/2.5]);
-            this.g_shapesList.push(wall2);
-            this.g_mapLayout[t+30][30].push(box);
+            this.g_mapLayout[t+30][30].push(box2);
             this.g_mapFilledCoordinates.push(box2);
         }
 
         for (var t = 0; t < 51; t++) {
-            let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            box.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(100-49-20)/2.5, 0, (t-49+30)/2.5]);
+            let box = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+            box.setLocalMatrix([0, 0, 0], [.39, .68, .39], [0, 0, 0, 1], [(100-49-20)/2.5, .401, (t-49+30)/2.5]);
             this.g_shapesList.push(box);
-
-            let wall = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-            wall.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(100-49-20)/2.5, 1/2.5+.001, (t-49+30)/2.5]);
-            this.g_shapesList.push(wall);
             this.g_mapLayout[80][t+30].push(box);
             this.g_mapFilledCoordinates.push(box);
 
-            let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)
-            box2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(-49+30)/2.5, 0, (t-49+30)/2.5]);
+            let box2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 1)
+            box2.setLocalMatrix([0, 0, 0], [.39, .68, .39], [0, 0, 0, 1], [(-49+30)/2.5, .401, (t-49+30)/2.5]);
             this.g_shapesList.push(box2);
-            let wall2 = new Cube([0, 0, 0], [0.65, 0.40, 0.02, 1.0], 80,80,80, 1)  
-            wall2.setLocalMatrix([0, .2, 0], [1.0, 1.0, 1.0], [0, 0, 0, 1], [(-49+30)/2.5, 1/2.5+.001, (t-49+30)/2.5]);
-            this.g_shapesList.push(wall2);
-            this.g_mapLayout[30][t+30].push(box);
+            this.g_mapLayout[30][t+30].push(box2);
             this.g_mapFilledCoordinates.push(box2);
         }
         this.placedReady = true;
@@ -300,7 +286,8 @@ class Scene {
 
         
         function add_if_valid_cell(_x, _z, layout, scene, enemies) {
-            if (!scene.placedReady) return;
+            if (!g_Scene.placedReady) return;
+
             if (_x >= 0 && _x < layout.cols && _z >= 0 && _z < layout.rows) {
                 if (scene.g_mapLayout[_z][_x].length <= 0) {
                     for (let i = 0; i < enemies.length; i++) {
@@ -335,32 +322,43 @@ class Scene {
                     if (eye[2] < poi[1] && l[2] > poi[1]) {d.elements[2] = eye[2] - poi[1];}
                     else if (eye[2] > poi[1] && l[2] < poi[1]) {d.elements[2] = eye[2] - poi[1];}
                     return d;
-                }
-            
+                }    
         }
         return d;
 
     }
 
     renderScene(dt) {
-        
+        gl.uniform1i(u_LightsOn, g_lightsOn);
+        gl.uniform1i(u_ShowNormals, g_toggleNormals);
+
+
         // for debug
         this.g_globalRotationMatrix.setIdentity();
         this.g_globalRotationMatrix.rotate(this.globalRotationY, 0, 1, 0);
         gl.uniformMatrix4fv(u_GlobalRotationMatrix, false, this.g_globalRotationMatrix.elements);
-    
+
+        // set point light
+        let l = this.lights[0];
+        l.obj.dynamicMatrix.setIdentity();
+        l.obj.dynamicMatrix.translate(l.mov[0], l.mov[1], l.mov[2]+Math.sin(lastTimeStamp*.5)*2)
+        l.obj.color[0] = g_lightColor[0]; l.obj.color[1] = g_lightColor[1]; l.obj.color[2] = g_lightColor[2];
+        gl.uniform3f(u_PointLightPosition, l.position[0]+l.mov[0], l.position[1]+l.mov[1], l.position[2]+l.mov[2])
+        gl.uniform3f(u_LightColor, l.obj.color[0], l.obj.color[1], l.obj.color[2])
+        l.obj.render(dt);
 
         for(var i = 0; i < this.g_enemies.length; i++) {  
             this.g_enemies[i].update(dt);
-          }
+        }
+        for(var i = 0; i < this.g_crystalsRender.length; i++) {  
+            this.g_crystalsRender[i].render(dt);
+        }
 
         for(var i = 0; i < this.g_shapesList.length; i++) {  
           this.g_shapesList[i].render(dt);
         }
 
-        for(var i = 0; i < this.g_crystalsRender.length; i++) {  
-            this.g_crystalsRender[i].render(dt);
-        }
+        
 
         this.cam.update(dt);
      
@@ -393,8 +391,8 @@ class Scene {
             }
         }
 
-        
-        
+        gl.uniform3f(u_CameraPos, -this.cam.g_eyePos.elements[2], this.cam.g_eyePos.elements[1], this.cam.g_eyePos.elements[0]);     
+    
     }
 
     onHitCrowbar() {

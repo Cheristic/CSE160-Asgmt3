@@ -13,6 +13,7 @@ class Enemy {
         this.movementAmountv = 1;
         this.movementAmount = new Vector3();
         this.movementVector = new Vector3();
+        this.movementMathVector = new Vector3();
         
         this.chasePlayer = true;
         this.waitForPlayerToBeInBounds = false;
@@ -74,7 +75,7 @@ class Enemy {
         this.scene.g_shapesList.push(this.base4);
         this.base3.children.push(this.base4)
 
-        this.head = new Sphere([0, 0, 0], [0.902, 0.831, 0.447, 1.0], .1, 12, -2);
+        this.head = new Sphere([0, 0, 0], [0.902, 0.831, 0.447, 1.0], .1, 12, -2, true);
         this.head.setLocalMatrix([0, 0, 0], [.09, .09, .09], [180, 0, 1, 0], [0, .13, 0]);
         this.scene.g_shapesList.push(this.head);
         this.base3.children.push(this.head)
@@ -142,6 +143,8 @@ class Enemy {
     }
 
     update(dt) {
+        if (!g_Scene.placedReady) return;
+        
         if (this.waitForPlayerToBeInBounds) {
             this.boundsTimer += dt;
             if (this.boundsTimer >= 1) {
@@ -168,7 +171,7 @@ class Enemy {
                     if (s != 0) this.rotationDirection *= s;
                     this.base.frameMatrix2.setRotate(this.rotationDirection, 0, 1, 0);
 
-                    this.movementVector.mul(this.movementSpeed * dt / 2.5);
+                    this.movementVector.mul(this.movementSpeed / 2.5);
                     this.movementAmount.clear();
                     this.movementAmountv += -1 * Math.sign(this.movementAmountv);
                 }  else {
@@ -192,10 +195,28 @@ class Enemy {
         }
 
         if (this.chasePlayer) {
-            this.movementAmount.add(this.movementVector);
+            this.movementMathVector.set(this.movementVector.elements);
+            this.movementMathVector.mul(dt);
+            this.movementAmount.add(this.movementMathVector);
             this.movementAmountv += (this.movementAmount.elements[0] + this.movementAmount.elements[2]) * 2.5;
             this.base.dynamicMatrix.setIdentity();
-            this.base.frameMatrix.translate(this.movementAmount.elements[0], 0, this.movementAmount.elements[2]);
+
+            if (Math.abs(this.movementAmountv) >= this.movementAmountTotal) {
+                this.movementAmount.normalize();
+                this.movementAmount.mul(.04);
+                let x = Math.round(this.base.frameMatrix.elements[12] / .4) * .4;
+                //x += Math.sign(this.movementAmount.elements[0])*.4;
+                let z = Math.round(this.base.frameMatrix.elements[14] / .4) * .4;
+                //z += Math.sign(this.movementAmount.elements[2])*.4;
+                this.base.frameMatrix.elements[12] = x;
+                this.base.frameMatrix.elements[14] = z;
+
+            } else {
+                this.base.frameMatrix.translate(this.movementAmount.elements[0], 0, this.movementAmount.elements[2]);
+
+            }
+
+            
             let animProgress = Math.abs(this.movementAmountv) >= this.movementAmountTotal ? this.movementAmountTotal : Math.abs(this.movementAmountv);
 
             if (animProgress == this.movementAmountTotal) {

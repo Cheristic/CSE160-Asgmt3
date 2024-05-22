@@ -3,13 +3,15 @@ class Camera {
     constructor(scene) {
 
         this.movementSpeed = 0.02;
-        this.rotationSpeed = 0.008;
+        this.rotationSpeed = 0.004;
         this.rotationSpeedKey = 0.06;
         this.gravity = -5;
         this.jumpForce = 1.5;
         this.isJumping = false;
         this.velocityY = 0;
         this.groundedY = .3;
+
+        this.mouseLoc = [0, 0];
 
         // Camera Globals
         this.g_eyePos = new Vector3([0, this.groundedY, -1.1]);
@@ -20,7 +22,9 @@ class Camera {
         this.g_viewMatrix = new Matrix4();
         this.g_projectionMatrix = new Matrix4();
 
-        document.addEventListener("keydown", function(ev) {keysHeldState[ev.keyCode || ev.which] = true;}, true);
+        document.addEventListener("keydown", function(ev) {keysHeldState[ev.keyCode || ev.which] = true;
+            ev.preventDefault();
+        }, true);
         document.addEventListener("keyup", function(ev) {keysHeldState[ev.keyCode || ev.which] = false;}, true);
 
         document.addEventListener("mousemove", this.mouseInput, true);
@@ -118,16 +122,19 @@ class Camera {
     mouseInput(ev) {
         let d = new Vector3(g_Scene.cam.g_lookAt.elements);
         d.sub(g_Scene.cam.g_eyePos)
+        let l = g_Scene.cam.mouseLoc;
+        l[0] += ev.movementX;
+        l[1] += ev.movementY;
         let de = d.elements;
         let hor_radius = Math.sqrt(Math.pow(de[0], 2) + Math.pow(de[2], 2))
         let ver_radius = Math.sqrt(Math.pow(hor_radius, 2) + Math.pow(de[1], 2))
         let hor_theta = Math.atan2(de[2], de[0]);
         let ver_theta = Math.atan2(de[1], hor_radius);
 
-        hor_theta += (ev.pageX - g_Scene.cam.mousePosDelta[0]) * g_Scene.cam.rotationSpeed;
-        ver_theta -= (ev.pageY - g_Scene.cam.mousePosDelta[1]) * g_Scene.cam.rotationSpeed;
-        g_Scene.cam.mousePosDelta[0] = ev.pageX;
-        g_Scene.cam.mousePosDelta[1] = ev.pageY;
+        hor_theta += (l[0] - g_Scene.cam.mousePosDelta[0]) * g_Scene.cam.rotationSpeed;
+        ver_theta -= (l[1] - g_Scene.cam.mousePosDelta[1]) * g_Scene.cam.rotationSpeed;
+        g_Scene.cam.mousePosDelta[0] = l[0];
+        g_Scene.cam.mousePosDelta[1] = l[1];
 
         de[0] = hor_radius*Math.cos(hor_theta) + g_Scene.cam.g_eyePos.elements[0];
         de[1] = ver_radius*Math.sin(ver_theta) + g_Scene.cam.g_eyePos.elements[1];
@@ -143,6 +150,8 @@ class Camera {
     }
 
     update(dt) {
+        if (!g_Scene.placedReady) return;
+
         this.keyboardInput();
 
         // check for collision with enemy
@@ -151,15 +160,15 @@ class Camera {
             var pos = [e.base.matrixBuffer.elements[12], e.base.matrixBuffer.elements[13], e.base.matrixBuffer.elements[14]]
             if (Math.abs(-this.g_eyePos.elements[2] - pos[0]) <= .25 && Math.abs(this.g_eyePos.elements[0] - pos[2]) <= .25 ) {
                 if (!this.isRestarting) {
-                    document.dispatchEvent(this.restartEvent);
                     g_Scene.placedReady = false;
+                    document.dispatchEvent(this.restartEvent);
                     this.isRestarting = true;
                 }
 
             }
         } 
 
-        g_Scene.placedReady = true;
+        
         this.isRestarting = false;
 
         // check for collision with crystal

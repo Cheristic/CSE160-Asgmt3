@@ -45,6 +45,8 @@ class Shape3D {
         this.frameMatrix2 = new Matrix4();
         this.animMatrix = new Matrix4();
         this.matrixBuffer = new Matrix4(); // aggregates all transforms
+        this.normalMatrix = new Matrix4();
+
 
         this.children = [];
         this.keyframes = [];
@@ -83,7 +85,10 @@ class Shape3D {
     render(dt) {    
       this.prepareModelMatrix();
 
+      this.normalMatrix.setInverseOf(this.matrixBuffer);
+      this.normalMatrix.transpose();
       gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrixBuffer.elements);
+      gl.uniformMatrix4fv(u_NormalMatrix, false, this.normalMatrix.elements);
       for (let i = 0; i < this.surfaces.length; i++) {
           this.surfaces[i].render();
       }
@@ -91,7 +96,7 @@ class Shape3D {
 }
 
 class Shape3DSurface {
-    constructor(position, color, vertices, uv = null, textureNum = -2, indices = null) {
+    constructor(position, color, vertices, uvMult) {
       this.position = position;
       this.color = color;
 
@@ -99,9 +104,7 @@ class Shape3DSurface {
       this.vertexBuffer = null;
       this.uvBuffer = null;
       this.vertices = vertices;
-      this.indices = indices;
-      this.uv = uv;
-      this.textureNum = textureNum;
+      this.uvMult = uvMult;
     }
   
     render() {
@@ -109,6 +112,8 @@ class Shape3DSurface {
       // Pass the color of a point to u_FragColor variable
       gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
       gl.uniform1i(u_textureSelector, this.textureNum);
+      gl.uniform1i(u_lit, false);
+      gl.uniform1f(u_UVMult, this.uvMult);
   
       // set up vertex buffer
       if (this.vertexBuffer == null) {
