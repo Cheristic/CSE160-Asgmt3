@@ -357,7 +357,6 @@ class Scene {
         for(var i = 0; i < this.g_shapesList.length; i++) {  
           this.g_shapesList[i].render(dt);
         }
-
         
 
         this.cam.update(dt);
