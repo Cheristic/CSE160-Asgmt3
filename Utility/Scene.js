@@ -63,11 +63,12 @@ class Scene {
     }
 
     async buildScene() {
-        let sky = new Sphere([0, 0, 0], [.09, .07, .12, 1.0], .1, 12, -2, false, 1)
-        sky.setLocalMatrix([0,0, 0], [-50, -50, 50], [270, 0, 1, 0], [0, 0, 0]);
+
+        let sky = new Cube([0, 0, 0], [.09, .07, .12, 1.0], -2, 1, false)
+        sky.setLocalMatrix([0,0, 0], [100, 100, 100], [0, 0, 0, 1], [.5, .35, 0]);
         this.g_shapesList.push(sky);
 
-        g_PointLight.obj = new Cube([0, 0, 0], [2, 2, 1, 1.0], -2, 1);
+        g_PointLight.obj = new Cube([0, 0, 0], [2, 2, 1, 1.0], -2, 1, false);
         g_PointLight.obj.setLocalMatrix([0, 0, 0], [2, .2, 2], [0, 0, 0, 1], [6, 6, .5]);
         g_PointLight.position = [6, 6, .5];
         this.lights.push(g_PointLight);

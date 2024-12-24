@@ -1,10 +1,11 @@
 class Cube extends Shape3D {
-  constructor(position, color, texNum, uvMult = 1) {
+  constructor(position, color, texNum, uvMult = 1, isLit = true) {
     super(position, color);
     this.type='cube';
     this.texNum = texNum;
     this.uvMult = uvMult;
     this.width = .3;
+    this.isLit = isLit;
   }
 
   static VERTICES = [
@@ -62,7 +63,7 @@ class Cube extends Shape3D {
     // Pass the color of a point to u_FragColor variable
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
     gl.uniform1i(u_textureSelector, this.texNum);
-    gl.uniform1i(u_lit, true);
+    gl.uniform1i(u_lit, this.isLit);
     gl.uniform1f(u_UVMult, this.uvMult);
 
     // set up vertex buffer

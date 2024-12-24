@@ -18,7 +18,7 @@ class Crystal extends Shape3D {
   
       this.generateSurfaces();
 
-      this.waypoint = new Cube([0, 0, 0], this.color, 40,40,400, -2)
+      this.waypoint = new Cube([0, 0, 0], this.color,-2, 1, false)
       this.waypoint.setLocalMatrix([0, 1, 0], [.2, 4.0, .2], [0, 0, 0, 1], [position[0], position[1], position[2]]);
       scene.g_shapesList.push(this.waypoint);
       this.children.push(this.waypoint);

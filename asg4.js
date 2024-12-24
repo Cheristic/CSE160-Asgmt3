@@ -63,7 +63,7 @@ var FSHADER_SOURCE = `
     }
     else if (u_textureSelector == 0) {
       color = texture2D(u_Sampler0, v_TexCoord);
-      specMult = 0.5;
+      specMult = .3;
       specExp = 2.0;
     }
     else if (u_textureSelector == 1) {
@@ -93,13 +93,13 @@ var FSHADER_SOURCE = `
       float nDotL = max(dot(N, L), 0.0);
       vec3 diffuse = u_LightColor * color.rgb * nDotL * 40.0 / (r*r);
       vec3 specular = (pow(max(dot(E, R), 0.0), specExp)) * vec3(1.0) * specMult;;
-      vec3 ambient = color.rgb * 0.23;
+      vec3 ambient = color.rgb * 0.3;
 
 
       // spot light
       vec3 spotLightVector = normalize(u_SpotLightPosition - vec3(v_Position));
       float spotDot = max(dot(spotLightVector, vec3(0.0, 1.0, 0.0)), 0.0);
-      float limitRange = .98 - .9;
+      float limitRange = .89;
       float lFallOff = clamp((spotDot - .9)/limitRange, 0.0, 1.0);
       float l = lFallOff * dot(N, spotLightVector);
       vec3 spot = vec3(l, l, l) * u_LightColor * .25;
